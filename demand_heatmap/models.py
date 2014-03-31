@@ -10,8 +10,6 @@ class Transformer(models.Model):
     '''
     Transformer represents a distribution transformer
     '''
-    
-    
     TransformerID = models.CharField(max_length=20, primary_key=True)
     Type = models.CharField(max_length=100)
     KVA = models.IntegerField()
@@ -35,15 +33,29 @@ class Transformer(models.Model):
     
     class Meta:
         db_table = "Transformers"
-        
+
+
+class TransformerLoad(models.Model):
+    '''
+    TransformerLoad is a timeseries measurement of demand for each Transformer
+    '''
+    TransformerLoadID = models.IntegerField(primary_key=True, db_column="TransformerLoads_id")
+    Transformer = models.ForeignKey(Transformer, db_column="TransformerID")
+    ReadDate = models.DateField()
+    reading_datetime_standard = models.DateTimeField()
+    Interval = models.IntegerField()
+    LoadMW = models.FloatField(db_column="TransformerLoad")
+    
+    class Meta:
+        db_table = "TransformerLoads"
+    
+    
 
 class Meter(models.Model):
     '''
     Meter represents a customer meter record
     '''
-
-        
-    MeterID = models.IntegerField(primary_key=True)
+    MeterID = models.IntegerField(primary_key=True)  # Although MySQL contains composite PK, MeterID is unique for Django
     MeterNumber = models.CharField(max_length=30)
     CustomerPremiseNumber = models.IntegerField()
     ConnectDate = models.TimeField(auto_now=False, auto_now_add=False)
