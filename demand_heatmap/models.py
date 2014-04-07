@@ -23,7 +23,7 @@ class Transformer(models.Model):
     Serial1 = models.CharField(max_length=100)
     Serial2 = models.CharField(max_length=100)
     Serial3 = models.CharField(max_length=100)
-    Enabled = models.SmallIntegerField()
+    Enabled = models.BooleanField()
     Quantity = models.SmallIntegerField()
     Angle = models.DecimalField()
     Status = models.CharField(max_length=100)
@@ -33,6 +33,7 @@ class Transformer(models.Model):
     
     class Meta:
         db_table = "Transformers"
+        managed = False
 
 
 class TransformerLoad(models.Model):
@@ -48,7 +49,8 @@ class TransformerLoad(models.Model):
     
     class Meta:
         db_table = "TransformerLoads"
-    
+        managed = False
+        ordering = ["reading_datetime_standard"]
     
 
 class Meter(models.Model):
@@ -64,4 +66,5 @@ class Meter(models.Model):
     class Meta:
         db_table = "Meters"
         unique_together = ("MeterNumber", "CustomerPremiseNumber", "ConnectDate")
+        managed = False
         
