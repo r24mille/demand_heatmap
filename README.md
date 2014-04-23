@@ -7,5 +7,4 @@ workspace against a private database.
 Though I'm developing with an Apache 2.0 
 License, I'm doubtful that this project is very useful to others currently.
 
-Depends on django, numpy, scipy, and matplotlib
-Written for Python 3.x interpreters
+Depends on django, numpy, scipy, and matplotlib. Written for Python 3.x.
