@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 import os
-import numpy as np
+
 import matplotlib
+import numpy
+
 import matplotlib.pyplot as plt
+from zonal_demand.models import ZonalDemand
+
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "demand_heatmap.settings")
     
     # Get timeseries of TransformerLoad associated with a Transformer
-    from zonal_demand.models import ZonalDemand
     demands = ZonalDemand.objects.using('zonal').all()
 
     # Find the length of the results to know first and last index, then get the number of days
@@ -18,7 +21,7 @@ if __name__ == "__main__":
     num_days = (end_date - start_date).days
 
     # Create an n x 24 matrix to hold each hour's values and zeros for hours without value
-    load_heatmap = np.zeros(((num_days + 1), 24))
+    load_heatmap = numpy.zeros(((num_days + 1), 24))
     
     # Loop over all TransformerLoad rows returned and populate them into the proper array slot
     for zonalDemand in demands:

@@ -1,4 +1,6 @@
+from django.conf import app_template
 from django.db import models
+
 
 class ZonalDemand(models.Model):
     """
