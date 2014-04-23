@@ -9,7 +9,7 @@ from zonal_demand.models import ZonalDemand
 
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "demand_heatmap.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ldc_analysis.settings")
     
     # Get timeseries of TransformerLoad associated with a Transformer
     demands = ZonalDemand.objects.using('zonal').all()
