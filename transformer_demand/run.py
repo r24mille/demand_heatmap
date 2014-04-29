@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 import os
-import numpy as np
+
 import matplotlib
+
+from ldc_analysis.models import Transformer
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ldc_analysis.settings")
     
     # Get timeseries of TransformerLoad associated with a Transformer
-    from transformer_demand.models import Transformer
     phaseStr = "1"
     areaStr = "A1-TEC"
     transformers = Transformer.objects.using('ldc').filter(Phases=phaseStr, Enabled=True, AreaTown=areaStr)
