@@ -79,7 +79,7 @@ def reading_count_histogram():
     # Create a list of observation counts
     reading_counts = [row[0] for row in cursor.fetchall()]
     reading_counts.sort()
-    trim = 0
+    trim = 0.0005
     sample_size = len(reading_counts)
     print("readings length pre-trim", len(reading_counts))
     readings = stats.trimboth(reading_counts, proportiontocut=trim)
@@ -101,7 +101,10 @@ def reading_count_histogram():
                 "trim:" + str(trim * 100.0) + "%)")
     pylab.xlabel("Number of Readings During Timeframe")
     pylab.ylabel("Number of Meters")
-    pylab.savefig("sm_reading_count_histogram_summer2011.png")
+    if trim > 0:
+        pylab.savefig("sm_reading_count_histogram_summer2011_trimmed.png")
+    else:
+        pylab.savefig("sm_reading_count_histogram_summer2011.png")
     pylab.tick_params(axis='both', )
     pylab.show()
 
