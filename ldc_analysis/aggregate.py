@@ -34,6 +34,8 @@ def partition_by_temperature(location_id, start_datetime, end_datetime):
                     "    and wu.location_id = " + str(location_id) + " " + 
                     "where arr.aggregate_reading_datetime_standard >= '" + str(start_datetime) + "' " + 
                     "and arr.aggregate_reading_datetime_standard <= '" + str(end_datetime) + "' " + 
+                    "and dayofweek(arr.aggregate_reading_datetime_standard) > 1 " + 
+                    "and dayofweek(arr.aggregate_reading_datetime_standard) < 7 " + 
                     "order by arr.aggregate_reading_datetime_standard asc")
     
     # Create a 2D array of aggregate readings partitioned by temperature and 
@@ -100,9 +102,9 @@ def plot_tou_dict_comparison(pre_tou_dict, post_tou_dict):
         
         fig = pyplot.figure(t)
         ax = pyplot.subplot()
-        rects1 = ax.bar(ind, pre_means, width, yerr=pre_stderrs, 
+        rects1 = ax.bar(ind, pre_means, width, yerr=pre_stderrs,
                         ecolor="black", color='#3C3CFF', edgecolor='#3C3CFF')  # blue
-        rects2 = ax.bar(ind + width, post_means, width, yerr=post_stderrs, 
+        rects2 = ax.bar(ind + width, post_means, width, yerr=post_stderrs,
                         ecolor="black", color='#580A58', edgecolor='#580A58')  # purple
         
         # Time-of-Use priods
@@ -151,7 +153,7 @@ def plot_tou_dict_comparison(pre_tou_dict, post_tou_dict):
         
         # autolabel(rects1)
         # autolabel(rects2)
-        pyplot.savefig("./figures/summer_" + str(t).zfill(2)  + ".png")
+        pyplot.savefig("./figures/summer_" + str(t).zfill(2) + ".png")
         pyplot.close(t)
             
 
@@ -162,7 +164,7 @@ if __name__ == '__main__':
     pre_tou_summer_dict = partition_by_temperature(windsor_location_id,
                                                    pre_tou_summer_start,
                                                    pre_tou_summer_end)
-    print("pre_tou", pre_tou_summer_dict)
+    # print("pre_tou", pre_tou_summer_dict)
     
     post_tou_summer_start = '2012-05-01 00:00:00'
     post_tou_summer_end = '2012-10-31 23:59:59'
@@ -170,6 +172,6 @@ if __name__ == '__main__':
                                                    post_tou_summer_start,
                                                    post_tou_summer_end)
     
-    print("post_tou", post_tou_summer_dict)
+    # print("post_tou", post_tou_summer_dict)
     
-    # plot_tou_dict_comparison(pre_tou_summer_dict, post_tou_summer_dict)
+    plot_tou_dict_comparison(pre_tou_summer_dict, post_tou_summer_dict)
