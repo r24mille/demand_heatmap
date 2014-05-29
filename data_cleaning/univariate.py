@@ -2,12 +2,12 @@
 import decimal
 import math
 import os
-from scipy import stats
 
-from django.db import connections, transaction
+from django.db import connections
 from numpy import arange
 import numpy
 import pylab
+from scipy import stats
 
 
 def create_histogram(a, trim_p, bin_size, p_title, p_ylabel, p_xlabel, 
