@@ -36,6 +36,14 @@ def partition_by_temperature(location_id, start_datetime, end_datetime):
                     "and arr.aggregate_reading_datetime_standard <= '" + str(end_datetime) + "' " + 
                     "and dayofweek(arr.aggregate_reading_datetime_standard) > 1 " + 
                     "and dayofweek(arr.aggregate_reading_datetime_standard) < 7 " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2011-05-23' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2011-07-01' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2011-09-05' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2011-10-10' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2012-05-21' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2012-07-01' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2012-09-03' " + 
+                    "and date(arr.aggregate_reading_datetime_standard) != '2012-10-08' " + 
                     "order by arr.aggregate_reading_datetime_standard asc")
     
     # Create a 2D array of aggregate readings partitioned by temperature and 
@@ -153,7 +161,8 @@ def plot_tou_dict_comparison(pre_tou_dict, post_tou_dict):
         
         # autolabel(rects1)
         # autolabel(rects2)
-        pyplot.savefig("./figures/summer_" + str(t).zfill(2) + ".png")
+        pyplot.savefig("./figures/summer_" + str(t) + ".png") # For lab report
+        # pyplot.savefig("./figures/summer_" + str(t).zfill(2) + ".png")
         pyplot.close(t)
             
 
