@@ -6,6 +6,7 @@ Created on May 28, 2014
 from django.db import connections
 from matplotlib import pyplot
 import numpy
+import math
 
 
 def partition_by_temperature(location_id, start_datetime, end_datetime):
@@ -161,26 +162,171 @@ def plot_tou_dict_comparison(pre_tou_dict, post_tou_dict):
         
         # autolabel(rects1)
         # autolabel(rects2)
-        pyplot.savefig("./figures/summer_" + str(t) + ".png") # For lab report
+        pyplot.savefig("./figures/summer_" + str(t) + ".png")  # For lab report
         # pyplot.savefig("./figures/summer_" + str(t).zfill(2) + ".png")
         pyplot.close(t)
             
+
+def quantize_by_period(period_id):
+    """
+    Selects pre- and post-TOU summary statistics for a single TOU period. 
+    Dictionary uses temperature as key.
+    
+    Arguments:
+    period_id -- PK of the r24mille_tou_period_codes table.
+    """
+    cursor = connections["ldc"].cursor()
+    cursor.execute("SELECT rounded_temp, sample_mean, tou_billing_active, " + 
+                    "sample_variance, number_of_readings " + 
+                    "FROM essex_annotated.r24mille_quantized_res_readings " + 
+                    "where tou_period_id = " + str(period_id) + " " + 
+                    "and sample_mean > 0 "
+                    "order by rounded_temp asc, tou_billing_active asc")
+    
+        # Create a 2D array of aggregate readings partitioned by temperature and 
+    # hour-of-day.
+    means_dict = {}
+    variance_dict = {}
+    counts_dict = {}
+    for row in cursor.fetchall():
+        rounded_temp = int(row[0])
+        sample_mean = row[1]
+        tou_billing_active = int(row[2])
+        sample_variance = int(row[3])
+        number_of_readings = int(row[4])
+        
+        if rounded_temp not in means_dict:
+            means_dict[rounded_temp] = [0] * 2
+        if rounded_temp not in variance_dict:
+            variance_dict[rounded_temp] = [0] * 2
+        if rounded_temp not in counts_dict:
+            counts_dict[rounded_temp] = [0] * 2
+            
+        means_dict[rounded_temp][tou_billing_active] = sample_mean
+        variance_dict[rounded_temp][tou_billing_active] = sample_variance
+        counts_dict[rounded_temp][tou_billing_active] = number_of_readings
+
+    return means_dict, variance_dict, counts_dict
+
+
+def plot_quantized_comparison(period_title,
+                              period_summary_dict, variance_dict, count_dict):
+    """
+    Creates summary comparison plots of a pre-TOU and a post-TOU for a given 
+    period. Plot also has variance and count labeling.
+    
+    Arguments:
+    period_summary_dict -- 
+    variance_dict -- 
+    count_dict -- 
+    """
+    temps = [int(k) for k in list(period_summary_dict.keys())]
+    print("temps", temps)
+    readings = []
+    # Iterate through all readings to find the max over all 
+    for t in temps:
+        readings.append(period_summary_dict[t][0])
+        readings.append(period_summary_dict[t][1])
+    max_reading = max(readings)
+    
+    pre_means = numpy.array(list(period_summary_dict.values()))[:, 0]
+    pre_stderrs = [ math.sqrt(v) for v in numpy.array(list(variance_dict.values()))[:, 0] ]
+    post_means = numpy.array(list(period_summary_dict.values()))[:, 1]
+    post_stderrs = [ math.sqrt(v) for v in numpy.array(list(variance_dict.values()))[:, 1] ]
+    
+    ind = numpy.arange(min(temps), max(temps) + 1)  # the x locations for the groups
+    print("ind", ind)
+    width = 0.3  # the width of the bars
+    
+    fig = pyplot.figure(period_title)
+    ax = pyplot.subplot()
+    rects1 = ax.bar(ind, pre_means, width, yerr=pre_stderrs,
+                    ecolor="black", color='#3C3CFF', edgecolor='#3C3CFF')  # blue
+    rects2 = ax.bar(ind + width, post_means, width, yerr=post_stderrs,
+                    ecolor="black", color='#580A58', edgecolor='#580A58')  # purple
+    
+    
+    # add some
+    ax.set_ylabel("Mean Hourly Reading During Period (kWh)")
+    ax.set_ylim(0, max_reading + 0.2)
+    ax.set_title("Mean Hourly Reading by Temperature During " + 
+                 "\n" + period_title + " Before/After Time-of-Use Billing")
+    ax.set_xticks(ind + width)
+    ax.set_xticklabels(temps)
+    ax.set_xlabel("Outdoor Temperature (Celsius)")
+    ax.set_xlim(min(temps), max(temps) + 1)
+    
+    ax.legend((rects1[0], rects2[0]),
+               ('Pre-TOU', 'Post-TOU'),
+               loc='upper right')
+    
+    def autolabel(rects):
+        # attach some text labels
+        for rect in rects:
+            height = rect.get_height()
+            if height > 0:
+                ax.text(rect.get_x() + rect.get_width() / 2.,
+                        1.05 * height,
+                        round(rect.get_height(), 2),
+                        ha='center',
+                        va='bottom')
+    
+    # autolabel(rects1)
+    # autolabel(rects2)
+    pyplot.savefig("./figures/quantized_" + period_title + ".png")  # For lab report
+    pyplot.close(period_title)
+
 
 if __name__ == '__main__':
     windsor_location_id = 13
     pre_tou_summer_start = '2011-05-01 00:00:00'
     pre_tou_summer_end = '2011-10-31 23:59:59'
-    pre_tou_summer_dict = partition_by_temperature(windsor_location_id,
-                                                   pre_tou_summer_start,
-                                                   pre_tou_summer_end)
+    # pre_tou_summer_dict = partition_by_temperature(windsor_location_id,
+    #                                                pre_tou_summer_start,
+    #                                                pre_tou_summer_end)
     # print("pre_tou", pre_tou_summer_dict)
+
     
     post_tou_summer_start = '2012-05-01 00:00:00'
     post_tou_summer_end = '2012-10-31 23:59:59'
-    post_tou_summer_dict = partition_by_temperature(windsor_location_id,
-                                                   post_tou_summer_start,
-                                                   post_tou_summer_end)
-    
+    # post_tou_summer_dict = partition_by_temperature(windsor_location_id,
+    #                                                post_tou_summer_start,
+    #                                                post_tou_summer_end)
     # print("post_tou", post_tou_summer_dict)
     
-    plot_tou_dict_comparison(pre_tou_summer_dict, post_tou_summer_dict)
+    # plot_tou_dict_comparison(pre_tou_summer_dict, post_tou_summer_dict)
+    
+    off1s_period_id = 1
+    off1s_means_dict, off1s_variance_dict, off1s_counts_dict = quantize_by_period(off1s_period_id)
+    plot_quantized_comparison("Summer Morning Off-Peak",
+                              off1s_means_dict,
+                              off1s_variance_dict,
+                              off1s_counts_dict)
+    
+    mid1s_period_id = 8
+    mid1s_means_dict, mid1s_variance_dict, mid1s_counts_dict = quantize_by_period(mid1s_period_id)
+    plot_quantized_comparison("Summer Morning Mid-Peak",
+                              mid1s_means_dict,
+                              mid1s_variance_dict,
+                              mid1s_counts_dict)
+    
+    on1s_period_id = 5
+    on1s_means_dict, on1s_variance_dict, on1s_counts_dict = quantize_by_period(on1s_period_id)
+    plot_quantized_comparison("Summer On-Peak",
+                              on1s_means_dict,
+                              on1s_variance_dict,
+                              on1s_counts_dict)
+    
+    mid2s_period_id = 9
+    mid2s_means_dict, mid2s_variance_dict, mid2s_counts_dict = quantize_by_period(mid2s_period_id)
+    plot_quantized_comparison("Summer Evening Mid-Peak",
+                              mid2s_means_dict,
+                              mid2s_variance_dict,
+                              mid2s_counts_dict)
+    
+    off2s_period_id = 2
+    off2s_means_dict, off2s_variance_dict, off2s_counts_dict = quantize_by_period(off2s_period_id)
+    plot_quantized_comparison("Summer Night Off-Peak",
+                              off2s_means_dict,
+                              off2s_variance_dict,
+                              off2s_counts_dict)
