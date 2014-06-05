@@ -317,7 +317,7 @@ if __name__ == '__main__':
                               on1s_variance_dict,
                               on1s_counts_dict)
     
-    mid2s_period_id = 9
+    mid2s_period_id = 9 
     mid2s_means_dict, mid2s_variance_dict, mid2s_counts_dict = quantize_by_period(mid2s_period_id)
     plot_quantized_comparison("Summer Evening Mid-Peak",
                               mid2s_means_dict,
